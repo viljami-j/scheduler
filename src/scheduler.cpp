@@ -10,6 +10,15 @@
 // todo: lis‰‰ kellonaikojen automaattinen j‰rjest‰minen
 // todo: siivoa koodi
 
+
+#define lang_finnish
+//#define lang_english
+
+static class language {
+
+};
+
+
 using namespace std;
 
 static vector<string> csv_header_week = { " ", "Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai", "Lauantai", "Sunnuntai" };
@@ -18,7 +27,7 @@ static class DayPlan {
 
 };
 
-static class WeeklyPlan {
+static class WeekPlan {
     
 };
 
@@ -225,13 +234,13 @@ auto p_new_entry = str_input_prompt("Uusi lis‰ys?\n1. Kyll‰\n2. Ei", { "1", "2" 
 
 // File names
 string output_day_plan = "p‰iv‰.csv";
-string output_week_plan = "viikkosuunnitelma.csv";
+string output_week_plan = "viikko.csv";
 //
 
 typedef map<string, map<string, string>> timetable;
 typedef map<string, string> dict;
 
-vector<string> keys = { "ma", "ti", "ke", "to", "pe", "la", "su"};
+vector<string> day_keys = { "ma", "ti", "ke", "to", "pe", "la", "su"};
 
 timetable populate_timetable() {
     // key-value: day-row
@@ -239,17 +248,17 @@ timetable populate_timetable() {
     timetable tt;
 
 
-    for (size_t i = 0; i < keys.size(); i++)
+    for (size_t i = 0; i < day_keys.size(); i++)
     {
-        tt[keys[i]] = dict();
-        tt[keys[i]][""];
+        tt[day_keys[i]] = dict();
+        tt[day_keys[i]][""];
     }
 
     return tt;
 }
 
 template <typename KeyType, typename ValueType>
-std::vector<KeyType> getKeys(const std::map<KeyType, ValueType>& inputMap) {
+std::vector<KeyType> get_keys(const std::map<KeyType, ValueType>& inputMap) {
     std::vector<KeyType> keys;
     for (const auto& pair : inputMap) {
         keys.push_back(pair.first);
@@ -259,8 +268,8 @@ std::vector<KeyType> getKeys(const std::map<KeyType, ValueType>& inputMap) {
 
 int main()
 {
-    string csv_output = "";
     int retval = _setmode(_fileno(stdout), _O_U16TEXT); // umlauts
+    string csv_output = "";
 
     while (true) {
         p_plan_type.prompt(true, false);
@@ -270,7 +279,6 @@ int main()
         }
         else if (p_plan_type.input == "2") { // Week planning
 
-            // Add commas
             csv_output += to_comma_separated_string(csv_header_week) + "\n";
 
             timetable output = populate_timetable();
@@ -304,11 +312,11 @@ int main()
             // temp bodge
             vector<string> custom_keys;
             custom_keys.push_back(" ");
-            for (size_t i = 0; i < keys.size(); i++)
-                custom_keys.push_back(keys[i]);
+            for (size_t i = 0; i < day_keys.size(); i++)
+                custom_keys.push_back(day_keys[i]);
             // temp bodge end
 
-            auto time_keys = getKeys(unique_times);
+            auto time_keys = get_keys(unique_times);
 
             for (size_t i = 0; i < row_count; i++) // rows
             {
@@ -327,6 +335,8 @@ int main()
                 csv_output.pop_back(); // pop extra comma 
                 csv_output += "\n";
             }
+
+            csv_output.pop_back(); // strip extra newline
         }
 
         p_end_session_prompt.prompt(true, false);
